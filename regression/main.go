@@ -81,7 +81,7 @@ func main() {
 	as the main aim of this assignment is to perform Linear Regression */
 
 	// Opening the studentscoresdf file again
-	f, err := os.Open("C:/Users/hi/OneDrive/Documents/practice/Social_Network_Ads.csv")
+	f, err := os.Open("C:/Users/tirdesh/OneDrive/Documents/fullstackdev_course/dataset/student_scores.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
