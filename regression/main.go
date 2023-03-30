@@ -1,31 +1,3 @@
-/*import (
-	"fmt"
-	"log"
-	"os"
-)
-
-// Open the CSV file.
-
-func main() {
-	advertFile, err := os.Open("C:/Users/tirdesh/OneDrive/Documents/fullstackdev_course/dataset/student_scores.csv")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer advertFile.Close()
-	// Create a dataframe from the CSV file.
-	advertDF := dataframe.ReadCSV(advertFile)
-	// Use the Describe method to calculate summary statistics
-	// for all of the columns in one shot.
-	advertSummary := advertDF.Describe()
-	// Output the summary statistics to stdout.
-	fmt.Println(advertSummary)
-}*/
-
-
-/*Linear Regression in Golang for predicting
-whether or not a user on social media will purchase a product through ads,
-given the age, salary etc of the user */
-
 package main
 
 import (
@@ -39,46 +11,45 @@ import (
 
 	"github.com/go-gota/gota/dataframe"
 
-	//for plotting
+	//plotting packages
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 
-	//for regression
+	//regression packages
 	"github.com/sajari/regression"
 )
 
 func main() {
-	// Step 1: To open the desired dataframe
-	netads, err := os.Open("C:/Users/tirdesh/OneDrive/Documents/fullstackdev_course/dataset/student_scores.csv")
+	// opening the desired dataframe
+	studentscores, err := os.Open("C:/Users/tirdesh/OneDrive/Documents/fullstackdev_course/dataset/student_scores.csv")
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer netads.Close()
+	defer studentscores.Close()
 
-	// Step 2: Creating a dataframe from the CSV file
-	/* Like we use Pandas in Python to create a dataframe, there seems
-	   to be a method called dataframe.ReadCSV() that does the same from a .csv file */
-	netdf := dataframe.ReadCSV(netads)
+	// Creating a dataframe from the CSV file to perform operations like plotting and finding regression lines 
+	/* similar to Pandas pd.readcsv(' ') in Python to create a dataframe, there seems to be a method called dataframe.ReadCSV() that does the same from a .csv file */
+	studentscoresdf := dataframe.ReadCSV(studentscores)
 
-	// Step 3: Using the Describe() method to get stats like in Python
-	netSummary := netdf.Describe()
+	// Using the Describe() method to get stats like in Python
+	netSummary := studentscoresdf.Describe()
 	fmt.Println(netSummary)
 
-	//Step 4: Open the dataset file for visualization and better understanding
-	/*f, err := os.Open("C:/Users/hi/OneDrive/Documents/practice/Social_Network_Ads.csv")
+	//Opening the dataset file for visualization and better understanding
+	/*f, err := os.Open("C:/Users/tirdesh/OneDrive/Documents/fullstackdev_course/dataset/student_scores.csv")
 	if err != nil{
 		log.Fatal(err)
 	}
 	defer f.Close()*/
 
-	// step 4.1: creating a histogram for each of the cols in the dataset
-	for _, colName := range netdf.Names() {
+	// creating a histogram for each of the cols in the dataset
+	for _, colName := range studentscoresdf.Names() {
 
 		//using a plotter.Values to fill 'plots' with the columns of the dataframe
-		plots := make(plotter.Values, netdf.Nrow())
-		for i, floater := range netdf.Col(colName).Float() {
+		plots := make(plotter.Values, studentscoresdf.Nrow())
+		for i, floater := range studentscoresdf.Col(colName).Float() {
 			plots[i] = floater
 		}
 
@@ -105,11 +76,11 @@ func main() {
 		}
 	}
 
-	// Step 5 Choosing the independent variable
+	// Choosing the independent variable
 	/* I have tried working with only one visualization after cloning the plot repo
 	as the main aim of this assignment is to perform Linear Regression */
 
-	// Opening the netdf file again
+	// Opening the studentscoresdf file again
 	f, err := os.Open("C:/Users/hi/OneDrive/Documents/practice/Social_Network_Ads.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -117,20 +88,20 @@ func main() {
 	defer f.Close()
 
 	//creating the dataframe
-	netdf2 := dataframe.ReadCSV(f)
+	studentscoresdf2 := dataframe.ReadCSV(f)
 
 	// picking the target feature
-	yTar := netdf.Col("Purchased").Float()
+	yTar := studentscoresdf.Col("scores").Float()
 
 	//creating a scatter plot for all of the features
-	for _, colName := range netdf.Names() {
+	for _, colName := range studentscoresdf.Names() {
 		//declaring new variable to store values for plotting
-		pts := make(plotter.XYs, netdf.Nrow())
+		pts := make(plotter.XYs, studentscoresdf.Nrow())
 
 		//Filling pts variable with the data
 		//setting an iteratror that will pass through all cols and store all values
 		// a separate one for the target variable too
-		for i, floater := range netdf.Col(colName).Float() {
+		for i, floater := range studentscoresdf.Col(colName).Float() {
 			pts[i].X = floater
 			pts[i].Y = yTar[i]
 		}
@@ -159,11 +130,11 @@ func main() {
 
 	}
 
-	// Step 6: Splitting dataset into training and test datasets
+	// Splitting dataset into training and test datasets
 	//  - calculate number of elements in each set
-	training := (4 * netdf.Nrow()) / 5
-	test := netdf.Nrow() / 5
-	if training+test < netdf.Nrow() {
+	training := (4 * studentscoresdf.Nrow()) / 5
+	test := studentscoresdf.Nrow() / 5
+	if training+test < studentscoresdf.Nrow() {
 		training++
 	}
 
@@ -184,8 +155,8 @@ func main() {
 	}
 
 	//create the datasets
-	traindf := netdf.Subset(trainid)
-	testdf := netdf.Subset(testid)
+	traindf := studentscoresdf.Subset(trainid)
+	testdf := studentscoresdf.Subset(testid)
 
 	//I need to create a 'map' that will be used in writing the data to the files
 	setmap := map[int]dataframe.DataFrame{
@@ -209,7 +180,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	// Step 7: Training the model
+	// Training the model
 		// opening the training dataset file
 		f1, err := os.Open("training.csv")
 		if err != nil {
@@ -227,11 +198,11 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// in this case the target variable is Purchased that is y
+		// in this case the target variable is scores that is y
 		// creating struct to train the model using the regression module
 		var r regression.Regression
-		r.SetObserved("Purchased")
-		r.SetVar(0, "Age")
+		r.SetObserved("scores")
+		r.SetVar(0, "Hours")
 
 		//looping for records and adding the training data to the regression vals
 		for i, record := range trainingdata {
@@ -239,20 +210,20 @@ func main() {
 			if i == 0 {
 				continue
 			}
-			//parse the Purchased regression or the y measure
+			//parse the scores regression or the y measure
 			yTarval, err := strconv.ParseFloat(record[3], 64)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			//parse the Age value
-			ageval, err := strconv.ParseFloat(record[0], 64)
+			//parse the Hours value
+			Hoursval, err := strconv.ParseFloat(record[0], 64)
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			//adding these points to the regression value
-			r.Train(regression.DataPoint(yTarval, []float64{ageval}))
+			r.Train(regression.DataPoint(yTarval, []float64{Hoursval}))
 		}
 
 		// fit the regression model
@@ -261,7 +232,7 @@ func main() {
 		//outputting the model params
 		fmt.Printf("Regression Formula: \n%v\n\n", r.Formula)
     
-	// Step 8: Evaluating the model
+	// Evaluating the model
 	//opening the test dataset
 	f, err = os.Open("test.csv")
 	if err != nil {
@@ -285,21 +256,21 @@ func main() {
 		if i == 0 {
 		continue
 		}
-		// Parse the observed predictions for "Purchased" or "y".
+		// Parse the observed predictions for "scores" or "y".
 		yObs, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
 		log.Fatal(err)
 		}
-		// Parse the age value.
-		ageval, err := strconv.ParseFloat(record[0], 64)
+		// Parse the Hours value.
+		Hoursval, err := strconv.ParseFloat(record[0], 64)
 		if err != nil {
 		log.Fatal(err)
 		}
 		// Predict y with trained model.
- yPredicted, err := r.Predict([]float64{ageval})
+ yPredicted, err := r.Predict([]float64{Hoursval})
 
 		//add the mae
-		mAE += math.Abs(yObs-yPredicted)/float64({ageageval})
+		mAE += math.Abs(yObs-yPredicted)/float64({HoursHoursval})
 	   }
 
 	   //output MAE to standard out
@@ -309,8 +280,8 @@ func main() {
 	   /* Running this will give the error value. Smaller the error, larger the accuracy score.
 	   In roder to understand the overall predictions, a plot can be prepared as well. */
 
-	//Step 8: Visualizing the regression 
-	   for i, floatVal := range advertDF.Col("Age").Float() {
+	//Visualizing the regression 
+	   for i, floatVal := range advertDF.Col("Hours").Float() {
 		pts[i].X = floater
 		pts[i].Y = yTar[i]
 		ptsPred[i].X = floater
@@ -321,8 +292,8 @@ func main() {
 	   if err != nil {
 		log.Fatal(err)
 	   }
-	   p.X.Label.Text = "Age"
-	   p.Y.Label.Text = "Purchased: Yes or No"
+	   p.X.Label.Text = "Hours"
+	   p.Y.Label.Text = "scores: Yes or No"
 	   p.Add(plotter.NewGrid())
 	   // Add the scatter plot points for the observations.
 	   s, err := plotter.NewScatter(pts)
